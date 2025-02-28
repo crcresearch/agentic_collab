@@ -32,15 +32,21 @@ def retrieve(persona, perceived):
   for event in perceived: 
     retrieved[event.description] = dict()
     retrieved[event.description]["curr_event"] = event
+    current_embedding = get_embedding(event.description)
     
-    relevant_events = persona.a_mem.retrieve_relevant_events(
-                        event.subject, event.predicate, event.object)
-    retrieved[event.description]["events"] = list(relevant_events)
+    similar_events={}
+    relevant_events = persona.a_mem.retrieve_relevant_events(event.subject, event.predicate, event.object)
+    event_embeddings = {ev: get_embedding(ev.description) for ev in relevant_events}
+    similar_events = {ev: cos_sim(emb, current_embedding) for ev, emb in event_embeddings.items()}
+    similar_events=dict(sorted(similar_events.items(), key=lambda x:x[1], reverse=True))
+    retrieved[event.description]["events"] = list(similar_events.keys())[:5]
 
-    relevant_thoughts = persona.a_mem.retrieve_relevant_thoughts(
-                          event.subject, event.predicate, event.object)
-    retrieved[event.description]["thoughts"] = list(relevant_thoughts)
-    
+    similar_thoughts={}
+    relevant_thoughts = persona.a_mem.retrieve_relevant_thoughts(event.subject, event.predicate, event.object)
+    thought_embeddings = {thought: get_embedding(thought.description) for thought in relevant_thoughts}
+    similar_thoughts = {thought: cos_sim(emb, current_embedding) for thought, emb in thought_embeddings.items()}
+    similar_events = dict(sorted(similar_thoughts.items(), key = lambda x:x[1], reverse = True))
+    retrieved[event.description]["thoughts"] = list(similar_thoughts.keys())[:5]
   return retrieved
 
 
