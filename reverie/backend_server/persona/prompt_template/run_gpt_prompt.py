@@ -171,12 +171,13 @@ def run_plugin(
   prompt_input = create_prompt_input(
     persona1=persona_list[0],
     persona2=persona_list[1],
+    persona3 = persona_list[2],
     movements=current_movements,
   )
   prompt = generate_prompt(prompt_input, plugin_template)
   print(prompt)
   fail_safe = get_fail_safe()
-  output = ChatGPT_safe_generate_response(
+  json_output, output = ChatGPT_safe_generate_response(
     prompt,
     repeat=3,
     fail_safe_response=fail_safe,
@@ -186,18 +187,22 @@ def run_plugin(
   )
   print(output)
 
+  if json_output: 
+    print("SPIDER")
+    print(json_output)
+
   gpt_param = {
     "engine": openai_config["model"],
     "max_tokens": 4096,
     "temperature": 0,
-    "top_p": 1,
+    "top_p": 3,
     "stream": False,
     "frequency_penalty": 0,
     "presence_penalty": 0,
     "stop": None,
   }
 
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+  return json_output, output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
 # def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
