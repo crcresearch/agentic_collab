@@ -64,6 +64,11 @@ while [[ $# -gt 0 ]]; do
             ARGS="${ARGS} --load_history ${2}"
             shift 2
             ;;
+        --mqtt)
+            ARGS="${ARGS} --mqtt"
+            echo "(${FILE_NAME}): MQTT mode enabled"
+            shift
+            ;;
         *)
             echo "Unknown argument: $1"
             exit 1
