@@ -5,7 +5,6 @@ import os
 import sys
 import time
 import shutil
-import reverie
 import argparse
 import webbrowser
 import subprocess
@@ -16,6 +15,7 @@ from datetime import datetime
 from multiprocessing import Process
 from openai_cost_logger import OpenAICostLoggerViz
 
+import reverie
 
 def parse_args() -> Tuple[str, str, int, Union[bool, None], str, str, str]:
     """Parse bash arguments

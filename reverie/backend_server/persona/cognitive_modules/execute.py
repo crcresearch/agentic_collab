@@ -10,8 +10,10 @@ import sys
 sys.path.append('../../')
 from path_finder import path_finder
 from utils import collision_block_id
+from maze import Maze
+from persona import Persona
 
-def execute(persona, maze, personas, plan): 
+def execute(persona: Persona, maze: Maze, personas: dict[str, Persona], plan: str): 
   """
   Given a plan (action's string address), we execute the plan (actually 
   outputs the tile coordinate path and the next coordinate for the 

@@ -5,12 +5,15 @@ File: perceive.py
 Description: This defines the "Perceive" module for generative agents. 
 """
 
-import sys
-import math
-
-sys.path.append("../../")
-
 from operator import itemgetter
+import math
+from typing import Optional
+
+import sys
+sys.path.append("../../")
+from persona import Persona
+from maze import Maze
+from memory_structures.associative_memory import ConceptNode
 from persona.prompt_template.gpt_structure import get_embedding
 from persona.prompt_template.run_gpt_prompt import (
   run_gpt_prompt_event_poignancy,
@@ -18,7 +21,7 @@ from persona.prompt_template.run_gpt_prompt import (
 )
 
 
-def generate_poig_score(persona, event_type, description):
+def generate_poig_score(persona: Persona, event_type: str, description: str) -> Optional[int]:
   if "is idle" in description:
     return 1
 
@@ -44,7 +47,7 @@ def generate_poig_score(persona, event_type, description):
       return 0
 
 
-def perceive(persona, maze):
+def perceive(persona: Persona, maze: Maze) -> list[ConceptNode]:
   """
   Perceives events around the persona and saves it to the memory, both events
   and spaces.

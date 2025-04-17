@@ -6,27 +6,33 @@ Description: Implements various path finding functions for generative agents.
 Some of the functions are defunct. 
 """
 import numpy as np
+from typing import Optional, Union, Literal
 
-def print_maze(maze):
+Maze = list[list[str]]
+Tile = tuple[int, int]
+
+def print_maze(maze: Maze):
   for row in maze:
     for item in row:
       print(item, end='')
     print()
 
 
-def path_finder_v1(maze, start, end, collision_block_char, verbose=False): 
-  def prepare_maze(maze, start, end):
+def path_finder_v1(
+  maze: Maze, start: Tile, end: Tile, collision_block_char: str, verbose: bool = False
+) -> Union[list[Tile], Literal[False]]:
+  def prepare_maze(maze: Maze, start: Tile, end: Tile) -> Maze:
     maze[start[0]][start[1]] = "S"
     maze[end[0]][end[1]] = "E"
     return maze
 
-  def find_start(maze):
+  def find_start(maze: Maze) -> Optional[Tile]:
     for row in range(len(maze)):
       for col in range(len(maze[0])):
         if maze[row][col] == 'S':
           return row, col
 
-  def is_valid_position(maze, pos_r, pos_c):
+  def is_valid_position(maze: Maze, pos_r: int, pos_c: int) -> bool:
     if pos_r < 0 or pos_c < 0:
       return False
     if pos_r >= len(maze) or pos_c >= len(maze[0]):
@@ -35,11 +41,13 @@ def path_finder_v1(maze, start, end, collision_block_char, verbose=False):
       return True
     return False
 
-  def solve_maze(maze, start, verbose=False):
-    path = []
+  def solve_maze(
+    maze: Maze, start: Tile, verbose: bool = False
+  ) -> Union[list[Tile], Literal[False]]:
+    path: list[Tile] = []
     # We use a Python list as a stack - then we have push operations as
     # append, and pop as pop.
-    stack = []
+    stack: list[Tile] = []
     # Add the entry point (as a tuple)
     stack.append(start)
     # Go through the stack as long as there are elements
@@ -75,9 +83,9 @@ def path_finder_v1(maze, start, end, collision_block_char, verbose=False):
     return False
 
   # clean maze
-  new_maze = []
+  new_maze: Maze = []
   for row in maze: 
-    new_row = []
+    new_row: list[str] = []
     for j in row: 
       if j == collision_block_char: 
         new_row += ["#"]
@@ -85,43 +93,42 @@ def path_finder_v1(maze, start, end, collision_block_char, verbose=False):
         new_row += [" "]
     new_maze += [new_row]
 
-  maze = new_maze
-
-  maze = prepare_maze(maze, start, end)
-  start = find_start(maze)
-  path = solve_maze(maze, start, verbose)
+  prepared_maze = prepare_maze(new_maze, start, end)
+  start_tile = find_start(prepared_maze)
+  path = solve_maze(prepared_maze, start_tile, verbose)
   return path
 
 
-def path_finder_v2(a, start, end, collision_block_char, verbose=False):
-  def make_step(m, k):
+def path_finder_v2(
+  maze: Maze, start: Tile, end: Tile, collision_block_char: str, verbose: bool = False
+) -> list[Tile]:
+  def make_step(m: list[list[int]], k: int):
     for i in range(len(m)):
       for j in range(len(m[i])):
         if m[i][j] == k:
-          if i>0 and m[i-1][j] == 0 and a[i-1][j] == 0:
+          if i>0 and m[i-1][j] == 0 and maze[i-1][j] == 0:
             m[i-1][j] = k + 1
-          if j>0 and m[i][j-1] == 0 and a[i][j-1] == 0:
+          if j>0 and m[i][j-1] == 0 and maze[i][j-1] == 0:
             m[i][j-1] = k + 1
-          if i<len(m)-1 and m[i+1][j] == 0 and a[i+1][j] == 0:
+          if i<len(m)-1 and m[i+1][j] == 0 and maze[i+1][j] == 0:
             m[i+1][j] = k + 1
-          if j<len(m[i])-1 and m[i][j+1] == 0 and a[i][j+1] == 0:
+          if j<len(m[i])-1 and m[i][j+1] == 0 and maze[i][j+1] == 0:
              m[i][j+1] = k + 1
 
-  new_maze = []
-  for row in a: 
-    new_row = []
+  new_maze: list[list[int]] = []
+  for row in maze: 
+    new_row: list[int] = []
     for j in row:
       if j == collision_block_char: 
         new_row += [1]
       else: 
         new_row += [0]
     new_maze += [new_row]
-  a = new_maze
 
-  m = []
-  for i in range(len(a)):
+  m: list[list[int]] = []
+  for i in range(len(new_maze)):
       m.append([])
-      for j in range(len(a[i])):
+      for j in range(len(new_maze[i])):
           m[-1].append(0)
   i,j = start
   m[i][j] = 1 
@@ -161,7 +168,7 @@ def path_finder_v2(a, start, end, collision_block_char, verbose=False):
   return the_path
 
 
-def path_finder(maze, start, end, collision_block_char, verbose=False):
+def path_finder(maze: Maze, start: Tile, end: Tile, collision_block_char: str, verbose: bool = False):
   # EMERGENCY PATCH
   start = (start[1], start[0])
   end = (end[1], end[0])
@@ -177,17 +184,17 @@ def path_finder(maze, start, end, collision_block_char, verbose=False):
   return path
 
 
-def closest_coordinate(curr_coordinate, target_coordinates): 
-  min_dist = None
-  closest_coordinate = None
+def closest_coordinate(curr_coordinate: Tile, target_coordinates: list[Tile]):
+  min_dist: Optional[np.float64] = None
+  closest_coordinate: Optional[Tile] = None
   for coordinate in target_coordinates: 
     a = np.array(coordinate)
     b = np.array(curr_coordinate)
-    dist = abs(np.linalg.norm(a-b))
-    if not closest_coordinate: 
+    dist: np.float64 = abs(np.linalg.norm(a-b))
+    if not closest_coordinate or not min_dist:
       min_dist = dist
       closest_coordinate = coordinate
-    else: 
+    else:
       if min_dist > dist: 
         min_dist = dist
         closest_coordinate = coordinate
@@ -195,21 +202,20 @@ def closest_coordinate(curr_coordinate, target_coordinates):
   return closest_coordinate
 
 
-def path_finder_2(maze, start, end, collision_block_char, verbose=False):
+def path_finder_2(maze: Maze, start: Tile, end: Tile, collision_block_char: str, verbose: bool = False):
   # start => persona_a
   # end => persona_b
-  start = list(start)
-  end = list(end)
+  end_list = list(end)
 
-  t_top = (end[0], end[1]+1)
-  t_bottom = (end[0], end[1]-1)
-  t_left = (end[0]-1, end[1])
-  t_right = (end[0]+1, end[1])
+  t_top = (end_list[0], end_list[1]+1)
+  t_bottom = (end_list[0], end_list[1]-1)
+  t_left = (end_list[0]-1, end_list[1])
+  t_right = (end_list[0]+1, end_list[1])
   pot_target_coordinates = [t_top, t_bottom, t_left, t_right]
 
   maze_width = len(maze[0]) 
   maze_height = len(maze)
-  target_coordinates = []
+  target_coordinates: list[Tile] = []
   for coordinate in pot_target_coordinates: 
     if coordinate[0] >= 0 and coordinate[0] < maze_width and coordinate[1] >= 0 and coordinate[1] < maze_height: 
       target_coordinates += [coordinate]
@@ -220,7 +226,7 @@ def path_finder_2(maze, start, end, collision_block_char, verbose=False):
   return path
 
 
-def path_finder_3(maze, start, end, collision_block_char, verbose=False):
+def path_finder_3(maze: Maze, start: Tile, end: Tile, collision_block_char: str, verbose: bool = False):
   # start => persona_a
   # end => persona_b
 

@@ -26,17 +26,19 @@ import math
 import os
 import shutil
 import traceback
-
+from typing import Optional, TypedDict
 from global_methods import read_file_to_list, check_if_file_exists, copyanything, freeze
-from utils import maze_assets_loc, fs_storage, fs_temp_storage
+from .utils import maze_assets_loc, fs_storage, fs_temp_storage
 from maze import Maze
+from maze import Tile
+from maze import BlockRemaps
 from persona.persona import Persona
 from persona.cognitive_modules.converse import load_history_via_whisper
 from persona.prompt_template.run_gpt_prompt import run_plugin
 
 current_file = os.path.abspath(__file__)
 
-def trace_calls_and_lines(frame, event, arg):
+def trace_calls_and_lines(frame, event: str):
   if event == 'call':
     code = frame.f_code
     filename = code.co_filename
@@ -50,15 +52,24 @@ def trace_calls_and_lines(frame, event, arg):
 #                                  REVERIE                                   #
 ##############################################################################
 
-logfile_name = "log.txt"
+class ReverieMeta(TypedDict): 
+  fork_sim_code: str
+  start_date: str
+  curr_time: str
+  sec_per_step: int
+  maze_name: str
+  persona_names: list[str]
+  step: int
+  block_remaps: Optional[BlockRemaps]
 
 class ReverieServer: 
-  def __init__(self, 
-               fork_sim_code,
-               sim_code):
-    
+  def __init__(
+    self, 
+    fork_sim_code: str,
+    sim_code: str,
+  ):
     print ("(reverie): Temp storage: ", fs_temp_storage)
-        
+
     # FORKING FROM A PRIOR SIMULATION:
     # <fork_sim_code> indicates the simulation we are forking from. 
     # Interestingly, all simulations must be forked from some initial 
@@ -74,7 +85,7 @@ class ReverieServer:
     copyanything(fork_folder, sim_folder)
 
     with open(f"{sim_folder}/reverie/meta.json") as json_file:  
-      reverie_meta = json.load(json_file)
+      reverie_meta: ReverieMeta = json.load(json_file)
 
     with open(f"{sim_folder}/reverie/meta.json", "w") as outfile: 
       reverie_meta["fork_sim_code"] = fork_sim_code
@@ -97,7 +108,7 @@ class ReverieServer:
                                                 "%B %d, %Y, %H:%M:%S")
     # <sec_per_step> denotes the number of seconds in game time that each 
     # step moves foward. 
-    self.sec_per_step = reverie_meta['sec_per_step']
+    self.sec_per_step: int = reverie_meta['sec_per_step']
     
     # <maze> is the main Maze instance. Note that we pass in the maze_name
     # (e.g., "double_studio") to instantiate Maze. 
@@ -116,12 +127,12 @@ class ReverieServer:
     # This dictionary is meant to keep track of all personas who are part of
     # the Reverie instance. 
     # e.g., ["Isabella Rodriguez"] = Persona("Isabella Rodriguezs")
-    self.personas = dict()
+    self.personas: dict[str, Persona] = dict()
     # <personas_tile> is a dictionary that contains the tile location of
     # the personas (!-> NOT px tile, but the actual tile coordinate).
     # The tile take the form of a set, (row, col). 
     # e.g., ["Isabella Rodriguez"] = (58, 39)
-    self.personas_tile = dict()
+    self.personas_tile: dict[str, Tile] = dict()
     
     # # <persona_convo_match> is a dictionary that describes which of the two
     # # personas are talking to each other. It takes a key of a persona's full
@@ -140,8 +151,8 @@ class ReverieServer:
     init_env = json.load(open(init_env_file))
     for persona_name in reverie_meta['persona_names']: 
       persona_folder = f"{sim_folder}/personas/{persona_name}"
-      p_x = init_env[persona_name]["x"]
-      p_y = init_env[persona_name]["y"]
+      p_x: int = init_env[persona_name]["x"]
+      p_y: int = init_env[persona_name]["y"]
       curr_persona = Persona(persona_name, persona_folder)
 
       self.personas[persona_name] = curr_persona
@@ -160,13 +171,11 @@ class ReverieServer:
     # used to communicate the code and step information to the frontend. 
     # Note that step file is removed as soon as the frontend opens up the 
     # simulation. 
-    curr_sim_code = dict()
-    curr_sim_code["sim_code"] = self.sim_code
+    curr_sim_code = { "sim_code": self.sim_code }
     with open(f"{fs_temp_storage}/curr_sim_code.json", "w") as outfile: 
       outfile.write(json.dumps(curr_sim_code, indent=2))
     
-    curr_step = dict()
-    curr_step["step"] = self.step
+    curr_step = { "step": self.step }
     with open(f"{fs_temp_storage}/curr_step.json", "w") as outfile: 
       outfile.write(json.dumps(curr_step, indent=2))
 
@@ -294,7 +303,7 @@ class ReverieServer:
       time.sleep(self.server_sleep * 10)
 
 
-  def start_server(self, int_counter, headless=False): 
+  def start_server(self, int_counter: int, headless: bool = False): 
     """
     The main backend server of Reverie. 
     This function retrieves the environment file from the frontend to 
@@ -708,9 +717,8 @@ class ReverieServer:
             # Otherwise, it's a relative path from the maze assets folder.
             curr_file = maze_assets_loc + "/" + file_path
 
-          rows = read_file_to_list(curr_file, header=True, strip_trail=True)[
-            1
-          ]
+          # The first row is the header, so we skip it.
+          rows = read_file_to_list(curr_file, strip_trail=True)[1:]
           clean_whispers = []
           for row in rows:
             agent_name = row[0].strip()

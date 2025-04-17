@@ -7,13 +7,63 @@ Description: Defines the short-term memory module for generative agents.
 
 import datetime
 import json
+from typing import TypedDict, Optional
 
 import sys
 sys.path.append('../../')
 from global_methods import check_if_file_exists
 
-class Scratch: 
-  def __init__(self, f_saved): 
+class ScratchFile(TypedDict):
+  vision_r: int
+  att_bandwidth: int
+  retention: int
+  curr_time: Optional[str]
+  curr_tile: Optional[tuple[int, int]]
+  daily_plan_req: str
+  name: str
+  first_name: str
+  last_name: str
+  age: int
+  innate: str
+  learned: str
+  currently: str
+  lifestyle: str
+  living_area: str
+  concept_forget: int
+  daily_reflection_time: int
+  daily_reflection_size: int
+  overlap_reflect_th: int
+  kw_strg_event_reflect_th: int
+  kw_strg_thought_reflect_th: int
+  recency_w: int
+  relevance_w: int
+  importance_w: int
+  recency_decay: float
+  importance_trigger_max: int
+  importance_trigger_curr: int
+  importance_ele_n: int
+  thought_count: int
+  daily_req: list
+  f_daily_schedule: list
+  f_daily_schedule_hourly_org: list
+  act_address: Optional[str]
+  act_start_time: Optional[str]
+  act_duration: Optional[int]
+  act_description: Optional[str]
+  act_pronunciatio: Optional[str]
+  act_event: tuple[str, Optional[str], Optional[str]]
+  act_obj_description: Optional[str]
+  act_obj_pronunciatio: Optional[str]
+  act_obj_event: tuple[Optional[str], Optional[str], Optional[str]]
+  chatting_with: Optional[str]
+  chat: Optional[list[list[str]]]
+  chatting_with_buffer: dict[str, int]
+  chatting_end_time: Optional[str]
+  act_path_set: bool
+  planned_path: list[tuple[int, int]]
+
+class Scratch:
+  def __init__(self, f_saved: str): 
     # PERSONA HYPERPARAMETERS
     # <vision_r> denotes the number of tiles that the persona can see around 
     # them. 
@@ -161,7 +211,7 @@ class Scratch:
 
     if check_if_file_exists(f_saved): 
       # If we have a bootstrap file, load that here. 
-      scratch_load = json.load(open(f_saved))
+      scratch_load: ScratchFile = json.load(open(f_saved))
 
       self.vision_r = scratch_load["vision_r"]
       self.att_bandwidth = scratch_load["att_bandwidth"]

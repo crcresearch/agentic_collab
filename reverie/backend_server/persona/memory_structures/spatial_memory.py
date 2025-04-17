@@ -6,41 +6,43 @@ Description: Defines the MemoryTree class that serves as the agents' spatial
 memory that aids in grounding their behavior in the game world. 
 """
 import json
-
+from typing import Union
 import sys
 sys.path.append('../../')
 from global_methods import check_if_file_exists
 
+Tree = dict[str, dict[str, dict[str, list[str]]]]
+
 class MemoryTree: 
-  def __init__(self, f_saved): 
-    self.tree = {}
+  def __init__(self, f_saved: str): 
+    self.tree: Tree = {}
     if check_if_file_exists(f_saved): 
-      self.tree = json.load(open(f_saved))
+      self.tree: Tree = json.load(open(f_saved))
 
 
-  def print_tree(self): 
-    def _print_tree(tree, depth):
+  def print_tree(self) -> None: 
+    def _print_tree(tree: Union[dict, list], depth: int) -> None:
       dash = " >" * depth
-      if type(tree) == type(list()): 
+      if type(tree) is list:
         if tree:
           print (dash, tree)
         return 
-
-      for key, val in tree.items(): 
-        if key: 
-          print (dash, key)
-        _print_tree(val, depth+1)
+      if type(tree) is dict:
+        for key, val in tree.items(): 
+          if key: 
+            print (dash, key)
+          _print_tree(val, depth+1)
     
     _print_tree(self.tree, 0)
     
 
-  def save(self, out_json):
+  def save(self, out_json: str) -> None:
     with open(out_json, "w") as outfile:
       json.dump(self.tree, outfile) 
 
 
 
-  def get_str_accessible_sectors(self, curr_world): 
+  def get_str_accessible_sectors(self, curr_world: str) -> str: 
     """
     Returns a summary string of all the arenas that the persona can access 
     within the current sector. 
@@ -59,7 +61,7 @@ class MemoryTree:
     return x
 
 
-  def get_str_accessible_sector_arenas(self, sector): 
+  def get_str_accessible_sector_arenas(self, sector: str) -> str: 
     """
     Returns a summary string of all the arenas that the persona can access 
     within the current sector. 
@@ -81,7 +83,7 @@ class MemoryTree:
     return x
 
 
-  def get_str_accessible_arena_game_objects(self, arena):
+  def get_str_accessible_arena_game_objects(self, arena: str) -> str:
     """
     Get a str list of all accessible game objects that are in the arena. If 
     temp_address is specified, we return the objects that are available in
@@ -114,7 +116,7 @@ class MemoryTree:
 
 
 if __name__ == '__main__':
-  x = f"../../../../environment/frontend_server/storage/the_ville_base_LinFamily/personas/Eddy Lin/bootstrap_memory/spatial_memory.json"
+  x = "../../../../environment/frontend_server/storage/the_ville_base_LinFamily/personas/Eddy Lin/bootstrap_memory/spatial_memory.json"
   x = MemoryTree(x)
   x.print_tree()
 

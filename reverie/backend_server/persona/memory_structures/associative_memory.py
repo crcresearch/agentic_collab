@@ -9,14 +9,27 @@ agents paper.
 """
 import json
 import datetime
+from typing import Optional, Literal
 
-
-class ConceptNode: 
-  def __init__(self,
-               node_id, node_count, type_count, node_type, depth,
-               created, expiration, 
-               s, p, o, 
-               description, embedding_key, poignancy, keywords, filling): 
+class ConceptNode:
+  def __init__(
+    self,
+    node_id: str, 
+    node_count: int, 
+    type_count: int, 
+    node_type: Literal["thought", "event", "chat"], 
+    depth: int,
+    created: datetime.datetime, 
+    expiration: Optional[datetime.datetime], 
+    subject: str, 
+    predicate: str, 
+    object: str, 
+    description: str, 
+    embedding_key: str, 
+    poignancy: int, 
+    keywords: list[str], 
+    filling: list[list[str]],
+  ):
     self.node_id = node_id
     self.node_count = node_count
     self.type_count = type_count
@@ -27,9 +40,9 @@ class ConceptNode:
     self.expiration = expiration
     self.last_accessed = self.created
 
-    self.subject = s
-    self.predicate = p
-    self.object = o
+    self.subject = subject
+    self.predicate = predicate
+    self.object = object
 
     self.description = description
     self.embedding_key = embedding_key
@@ -43,21 +56,21 @@ class ConceptNode:
 
 
 class AssociativeMemory: 
-  def __init__(self, f_saved): 
-    self.id_to_node = dict()
+  def __init__(self, f_saved: str): 
+    self.id_to_node: dict[str, ConceptNode] = dict()
 
-    self.seq_event = []
-    self.seq_thought = []
-    self.seq_chat = []
+    self.seq_event: list[ConceptNode] = []
+    self.seq_thought: list[ConceptNode] = []
+    self.seq_chat: list[ConceptNode] = []
 
-    self.kw_to_event = dict()
-    self.kw_to_thought = dict()
-    self.kw_to_chat = dict()
+    self.kw_to_event: dict[str, list[ConceptNode]] = dict()
+    self.kw_to_thought: dict[str, list[ConceptNode]] = dict()
+    self.kw_to_chat: dict[str, list[ConceptNode]] = dict()
 
-    self.kw_strength_event = dict()
-    self.kw_strength_thought = dict()
+    self.kw_strength_event: dict[str, int] = dict()
+    self.kw_strength_thought: dict[str, int] = dict()
 
-    self.embeddings = json.load(open(f_saved + "/embeddings.json"))
+    self.embeddings: dict[str, list[float]] = json.load(open(f_saved + "/embeddings.json"))
 
     nodes_load = json.load(open(f_saved + "/nodes.json"))
     for count in range(len(nodes_load.keys())): 
@@ -76,9 +89,9 @@ class AssociativeMemory:
         expiration = datetime.datetime.strptime(node_details["expiration"],
                                                 '%Y-%m-%d %H:%M:%S')
 
-      s = node_details["subject"]
-      p = node_details["predicate"]
-      o = node_details["object"]
+      subject = node_details["subject"]
+      predicate = node_details["predicate"]
+      object = node_details["object"]
 
       description = node_details["description"]
       embedding_pair = (node_details["embedding_key"], 
@@ -88,13 +101,13 @@ class AssociativeMemory:
       filling = node_details["filling"]
       
       if node_type == "event": 
-        self.add_event(created, expiration, s, p, o, 
+        self.add_event(created, expiration, subject, predicate, object, 
                    description, keywords, poignancy, embedding_pair, filling)
       elif node_type == "chat": 
-        self.add_chat(created, expiration, s, p, o, 
+        self.add_chat(created, expiration, subject, predicate, object, 
                    description, keywords, poignancy, embedding_pair, filling)
       elif node_type == "thought": 
-        self.add_thought(created, expiration, s, p, o, 
+        self.add_thought(created, expiration, subject, predicate, object, 
                    description, keywords, poignancy, embedding_pair, filling)
 
     kw_strength_load = json.load(open(f_saved + "/kw_strength.json"))

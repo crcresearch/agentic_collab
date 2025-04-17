@@ -8,7 +8,7 @@ import shutil
 import json
 from global_methods import create_folder_if_not_there, find_filenames
 
-def compress(sim_code):
+def compress(sim_code: str):
   sim_storage = f"../environment/frontend_server/storage/{sim_code}"
   compressed_storage = f"../environment/frontend_server/compressed_storage/{sim_code}"
   persona_folder = sim_storage + "/personas"
