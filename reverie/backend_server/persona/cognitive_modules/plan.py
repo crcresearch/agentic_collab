@@ -647,8 +647,11 @@ def _long_term_planning(persona, new_day):
     # if this is the start of generation (so there is no previous day's 
     # daily requirement, or if we are on a new day, we want to create a new
     # set of daily requirements.
+    #Making sure we revise the identity of the persona before creating the daily_req on day 1
+    revise_identity(persona)
+    
     persona.scratch.daily_req = generate_first_daily_plan(persona, 
-                                                          wake_up_hour)
+                                                        wake_up_hour)
   elif new_day == "New day":
     revise_identity(persona)
 

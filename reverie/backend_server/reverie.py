@@ -475,11 +475,16 @@ class ReverieServer:
                   prompt_file_path = (
                     f"{plugin_path}/prompt_template/{prompt_file}"
                   )
-                  response = run_plugin(
+                  json_output, response = run_plugin(
                     prompt_file_path,
                     movements,
                     self.personas,
                   )
+
+                  if json_output["Did the search and rescue mission end?"] == True:
+                    print("mission success")
+                    raise KeyboardInterrupt
+
 
                   with open(
                     f"{plugin_path}/output/{self.step}-{prompt_file}.json",
