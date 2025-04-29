@@ -10,14 +10,14 @@ import argparse
 import webbrowser
 import subprocess
 import traceback
-from typing import Tuple, Union, Optional
+from typing import Tuple, Optional
 from pathlib import Path
 from datetime import datetime
 from multiprocessing import Process
 from openai_cost_logger import OpenAICostLoggerViz
 
 
-def parse_args() -> Tuple[str, str, int, Union[bool, None], str, str, str]:
+def parse_args() -> Tuple[str, str, int, str, str, str, str, bool]:
     """Parse bash arguments
 
     Returns:
@@ -26,6 +26,10 @@ def parse_args() -> Tuple[str, str, int, Union[bool, None], str, str, str]:
             - the name of the new simulation
             - total steps to run (step = 10sec in the simulation)
             - open the simulator UI
+            - browser path
+            - port number
+            - history file path
+            - use MQTT
     """
     parser = argparse.ArgumentParser(description='Reverie Server')
     parser.add_argument(
@@ -71,16 +75,23 @@ def parse_args() -> Tuple[str, str, int, Union[bool, None], str, str, str]:
         required=False,
         help='Load agent history file'
     )
-    origin = parser.parse_args().origin
-    target = parser.parse_args().target
-    steps = parser.parse_args().steps
-    ui = parser.parse_args().ui
-    ui = True if ui.lower() == "true" else False if ui.lower() == "false" else None
-    browser_path = parser.parse_args().browser_path
-    port = parser.parse_args().port
-    history_file = parser.parse_args().load_history
+    parser.add_argument(
+        '--mqtt',
+        action='store_true',
+        help='Enable MQTT mode for communication'
+    )
+    args = parser.parse_args()
+
+    origin = args.origin
+    target = args.target
+    steps = args.steps
+    ui = args.ui
+    browser_path = args.browser_path
+    port = args.port
+    history_file = args.load_history
+    use_mqtt = args.mqtt
     
-    return origin, target, steps, ui, browser_path, port, history_file
+    return origin, target, steps, ui, browser_path, port, history_file, use_mqtt
 
 
 def get_starting_step(exp_name: str) -> int:
@@ -191,7 +202,7 @@ if __name__ == '__main__':
     curr_stepbacks = 0
     log_path = "cost-logs" # where the simulations' prints are stored
     idx = 0
-    origin, target, tot_steps, ui, browser_path, port, history_file = parse_args()
+    origin, target, tot_steps, ui, browser_path, port, history_file, use_mqtt = parse_args()
     current_step = get_starting_step(origin)
     exp_name = target
     start_time = datetime.now()
@@ -203,6 +214,7 @@ if __name__ == '__main__':
     print(f"(Auto-Exec): Target: {target}", flush=True)
     print(f"(Auto-Exec): Total steps: {tot_steps}", flush=True)
     print(f"(Auto-Exec): Checkpoint Freq: {checkpoint_freq}", flush=True)
+    print(f"(Auto-Exec): MQTT Mode: {'Enabled' if use_mqtt else 'Disabled'}", flush=True)
 
     while current_step < tot_steps:
         try:
@@ -210,7 +222,7 @@ if __name__ == '__main__':
             target = f"{exp_name}-s-{idx}-{current_step}-{curr_checkpoint}"
             print(f"(Auto-Exec): STAGE {idx}", flush=True)
             print(f"(Auto-Exec): Running experiment '{exp_name}' from step '{current_step}' to '{curr_checkpoint}'", flush=True)
-            rs = reverie.ReverieServer(origin, target)
+            rs = reverie.ReverieServer(origin, target, use_mqtt=use_mqtt)
 
             # Load agent history if provided
             if history_file and current_step == 0:
@@ -218,14 +230,14 @@ if __name__ == '__main__':
 
             th, pid = None, None
             # Headless chrome doesn't need a thread since it create a dedicated thread by itself
-            if ui == True:
+            if ui == "True":
                 th = Process(target=start_web_tab, args=(ui, browser_path, port))
                 th.start()
                 rs.open_server(input_command=f"run {steps_to_run}")
-            elif ui == False:
+            elif ui == "False":
                 pid = start_web_tab(ui, browser_path, port)
                 rs.open_server(input_command=f"run {steps_to_run}")
-            elif ui is None:
+            elif ui == "None":
                 rs.open_server(input_command=f"headless {steps_to_run}")
         except KeyboardInterrupt:
             print("(Auto-Exec): KeyboardInterrupt: Stopping the experiment.", flush=True)
@@ -249,7 +261,7 @@ if __name__ == '__main__':
                 origin, current_step, idx = save_checkpoint(rs, idx)
 
             print(f"(Auto-Exec): Error at step {current_step}", flush=True)
-            print(f"(Auto-Exec): Exception {e.args[0]}", flush=True)
+            print(f"(Auto-Exec): Exception {e.args[0] if len(e.args) > 0 else 'Unknown'}", flush=True)
         else:
             origin, current_step, idx = save_checkpoint(rs, idx)
             curr_checkpoint = get_new_checkpoint(current_step, tot_steps, checkpoint_freq)

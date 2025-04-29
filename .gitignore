@@ -7,6 +7,7 @@ environment/frontend_server/storage/*
 environment/frontend_server/temp_storage*/*
 environment/frontend_server/frontend_server/settings/local.py
 environment/frontend_server/static_dirs/*
+!environment/frontend_server/static_dirs/js/
 reverie/backend_server/cost-logs/*
 
 # Logs folder
