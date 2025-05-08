@@ -134,20 +134,22 @@ class ReverieServer:
     # # Note that the key pairs are *ordered alphabetically*. 
     # # e.g., dict[("Adam Abraham", "Zane Xu")] = "Adam: baba \n Zane:..."
     # self.persona_convo = dict()
-
     # Loading in all personas. 
     init_env_file = f"{sim_folder}/environment/{str(self.step)}.json"
     init_env = json.load(open(init_env_file))
     for persona_name in reverie_meta['persona_names']: 
       persona_folder = f"{sim_folder}/personas/{persona_name}"
+      print(persona_name)
+      print(init_env)
       p_x = init_env[persona_name]["x"]
       p_y = init_env[persona_name]["y"]
       curr_persona = Persona(persona_name, persona_folder)
 
+      # We set the persona's current tile to the tile that it is at in th
+      print(p_y, p_x)
       self.personas[persona_name] = curr_persona
       self.personas_tile[persona_name] = (p_x, p_y)
-      self.maze.tiles[p_y][p_x]["events"].add(curr_persona.scratch
-                                              .get_curr_event_and_desc())
+      self.maze.tiles[p_y][p_x]["events"].add(curr_persona.scratch.get_curr_event_and_desc())
 
     # REVERIE SETTINGS PARAMETERS:  
     # <server_sleep> denotes the amount of time that our while loop rests each

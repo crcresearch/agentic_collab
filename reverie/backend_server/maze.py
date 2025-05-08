@@ -129,6 +129,7 @@ class Maze:
     arena_maze = []
     game_object_maze = []
     spawning_location_maze = []
+    print(len(collision_maze_raw))
     for i in range(0, len(collision_maze_raw), meta_info["maze_width"]): 
       tw = meta_info["maze_width"]
       self.collision_maze += [collision_maze_raw[i:i+tw]]
@@ -136,7 +137,8 @@ class Maze:
       arena_maze += [arena_maze_raw[i:i+tw]]
       game_object_maze += [game_object_maze_raw[i:i+tw]]
       spawning_location_maze += [spawning_location_maze_raw[i:i+tw]]
-
+    # Now we have the maze matrices in the form of a 2-d matrix
+  
     # Once we are done loading in the maze, we now set up self.tiles. This is
     # a matrix accessed by row:col where each access point is a dictionary
     # that contains all the things that are taking place in that tile. 
@@ -156,10 +158,12 @@ class Maze:
     for i in range(self.maze_height): 
       row = []
       for j in range(self.maze_width):
+   
         tile_details = dict()
         tile_details["world"] = wb
         
         tile_details["sector"] = ""
+        
         if sector_maze[i][j] in sb_dict: 
           tile_details["sector"] = sb_dict[sector_maze[i][j]]
         

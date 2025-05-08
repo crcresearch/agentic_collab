@@ -3,7 +3,7 @@
   "start_date": "February 13, 2023",
   "curr_time": "February 13, 2023, 00:00:00",
   "sec_per_step": 10,
-  "maze_name": "the_ville",
+  "maze_name": "the_crc",
   "persona_names": [
     "Isabella Rodriguez", 
     "Maria Lopez",
@@ -12,58 +12,14 @@
   "step": 0,
   "block_remaps": {
     "sector": {
-      "Harvey Oak Supply Store": "Ville Special Forces Station",
-      "artist's co-living space": "Barrack #1",
-      "Arthur Burton's apartment": "Apartment #1",
-      "Ryan Park's apartment": "Apartment #2",
-      "Isabella Rodriguez's apartment": "Apartment #3",
-      "Giorgio Rossi's apartment": "Apartment #4",
-      "Carlos Gomez's apartment": "Apartment #5",
-      "The Rose and Crown Pub": "Bar",
-      "Hobbs Cafe": "Dining Hall",
-      "Oak Hill College": "Library",
-      "Johnson Park": "Botanical gardens",
-      "The Willows Market and Pharmacy": "Food and medicine storage",
-      "Adam Smith's House": "Condo #1",
-      "Yuriko Yamamoto's house": "Condo #2",
-      "Moore family's house": "Condo #3",
-      "Dorm for Oak Hill College": "Barracks #2",
-      "Tamara Taylor and Carmen Ortiz's house": "Condo #4",
-      "Moreno family's house": "Condo #5",
-      "Lin family's house": "Condo #6"
+  
     },
     "arena": {
 
-      "supply store": "Ville Special Forces Station",
-      "Latoya Williams's room": "Bedroom #1",
-      "Latoya Williams's bathroom": "Bathroom #1",
-      "Rajiv Patel's room": "Bedroom #2",
-      "Rajiv Patel's bathroom": "Bathroom #2",
-      "Abigail Chen's room": "Bedroom #3",
-      "Abigail Chen's bathroom": "Bathroom #3", 
-      "Francisco Lopez's room": "Bedroom #4",
-      "Francisco Lopez's bathroom": "Bathroom #4",
-      "Hailey Johnson's room": "Bedroom #5",
-      "Hailey Johnson's bathroom": "Bathroom #5",
-      "park": "Garden",
-      "cafe": "cafeteria",
-      "store": "storage",
-      "Klaus Mueller's room": "Bedroom #1",
-      "Maria Lopez's room": "Bedroom #2",
-      "Ayesha Khan's room": "Bedroom #3",
-      "Wolfgang Schulz's room": "Bedroom #4",
-      "Tamara Taylor's room": "Bedroom #1",
-      "Carmen Ortiz's room": "Bedroom #2",
-      "Tom and Jane Moreno's bedroom": "Bedroom #3",
-      "Mei and John Lin's bedroom": "Bedroom #1",
-      "Eddy Lin's bedroom": "Bedroom #2"
 
     },
     "game_object": {
-      "supply store product shelf": "fire truck",
-      "supply store counter": "common area",
-      "behind the supply store counter": "bunks",
-      "grocery store shelf": "suspicious backpack"
+     
     }
   }
 }

@@ -189,17 +189,6 @@ To use this feature, add a `block_remaps` property to your simulation's `meta.js
   ],
   "step": 0,
   "block_remaps": {
-    "sector": {
-      "Harvey Oak Supply Store": "Fire station"
-    },
-    "arena": {
-      "supply store": "fire station"
-    },
-    "game_object": {
-      "supply store product shelf": "fire truck",
-      "supply store counter": "common area",
-      "behind the supply store counter": "bunks"
-    }
   }
 }
 ```
