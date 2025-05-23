@@ -67,6 +67,7 @@ openai==1.41.1
 openai-cost-logger==0.4.1
 outcome==1.2.0
 packaging==23.0
+paho-mqtt==2.1.0
 pandas==2.0.3
 pathspec==0.12.1
 patsy==0.5.3

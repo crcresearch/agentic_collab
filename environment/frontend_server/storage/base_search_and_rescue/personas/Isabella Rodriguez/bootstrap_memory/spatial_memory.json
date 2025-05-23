@@ -1,65 +1,77 @@
 {
-  "the Ville": {
-    "Hobbs Cafe": {
-      "cafe": [
-        "refrigerator",
-        "cafe customer seating",
-        "cooking area",
-        "kitchen sink",
-        "behind the cafe counter",
-        "piano"
+  "the CRC": {
+    "Living Area": {
+      "Living Area": [
+        "sofa"
       ]
     },
-    "Isabella Rodriguez's apartment": {
-      "main room": [
-        "bed",
+    "Desk Area 1": {
+      "Desk Area 1": [
         "desk",
-        "refrigerator",
-        "closet",
-        "shelf"
+        "chair",
+        "filing cabinet"
       ]
     },
-    "The Rose and Crown Pub": {
-      "pub": [
-        "shelf",
-        "refrigerator",
-        "bar customer seating",
-        "behind the bar counter",
-        "kitchen sink",
-        "cooking area",
-        "microphone"
+    "Desk Area 2": {
+      "Desk Area 2": [
+        "desk",
+        "chair",
+        "monitor"
       ]
     },
-    "Fire station": {
-      "fire station": [
-        "fire truck",
-        "bunks",
-        "common area"
+    "Small Conference Room 1": {
+      "Small Conference Room 1": [
+        "round table"
       ]
     },
-    "The Willows Market and Pharmacy": {
-      "store": [
-        "behind the pharmacy counter",
-        "pharmacy store shelf",
-        "pharmacy store counter",
-        "grocery store shelf",
-        "behind the grocery counter",
-        "grocery store counter"
+    "Small Conference Room 2": {
+      "Small Conference Room 2": [
+        "table"
       ]
     },
-    "Dorm for Oak Hill College": {
-      "garden": [
-        "dorm garden"
-      ],
-      "common room": [
-        "common room sofa",
-        "pool table",
-        "common room table"
+    "Large Conference Room": {
+      "Large Conference Room": [
+        "long table"
       ]
     },
-    "Johnson Park": {
-      "park": [
-        "park garden"
+    "Bathroom 1": {
+      "Bathroom 1": [
+        "toilet"
+      ]
+    },
+    "Bathroom 2": {
+      "Bathroom 2": [
+        "sink"
+      ]
+    },
+    "Closet": {
+      "Closet": [
+        "storage bin"
+      ]
+    },
+    "Hallway 1": {
+      "Hallway 1": [
+        "directional signage"
+      ]
+    },
+    "Hallway 2": {
+      "Hallway 2": [
+        "exit sign"
+      ]
+    },
+    "Hallway 3": {
+      "Hallway 3": [
+        "hallway sign"
+      ]
+    },
+    "Hallway 4": {
+      "Hallway 4": [
+        "hallway marker"
+      ]
+    },
+    "Break Room": {
+      "Break Room": [
+        "kitchen counter"
       ]
     }
   }

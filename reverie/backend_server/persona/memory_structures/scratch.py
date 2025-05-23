@@ -13,7 +13,11 @@ sys.path.append('../../')
 from global_methods import check_if_file_exists
 
 class Scratch: 
-  def __init__(self, f_saved): 
+  def __init__(self, f_saved):
+    # non-cognitive vs. non-embodied Type persona
+    self.noncognitive = None # If True, then no planning, reflecting, deep thinking
+    self.nonembodied = None # If True, then no physical location
+
     # PERSONA HYPERPARAMETERS
     # <vision_r> denotes the number of tiles that the persona can see around 
     # them. 
@@ -163,6 +167,9 @@ class Scratch:
       # If we have a bootstrap file, load that here. 
       scratch_load = json.load(open(f_saved))
 
+      self.noncognitive = scratch_load["noncognitive"]
+      self.nonembodied = scratch_load["nonembodied"]
+
       self.vision_r = scratch_load["vision_r"]
       self.att_bandwidth = scratch_load["att_bandwidth"]
       self.retention = scratch_load["retention"]
@@ -245,6 +252,10 @@ class Scratch:
       None
     """
     scratch = dict() 
+
+    scratch["noncognitive"] = self.noncognitive
+    scratch["nonembodied"] = self.nonembodied
+
     scratch["vision_r"] = self.vision_r
     scratch["att_bandwidth"] = self.att_bandwidth
     scratch["retention"] = self.retention
@@ -427,6 +438,11 @@ class Scratch:
     commonset += f"Current Date: {self.curr_time.strftime('%A %B %d') if self.curr_time else ''}\n"
     return commonset
 
+  def is_noncognitive(self):
+    return self.noncognitive
+  
+  def is_nonembodied(self):
+    return self.nonembodied
 
   def get_str_name(self): 
     return self.name

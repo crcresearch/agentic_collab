@@ -65,7 +65,7 @@ Context: {context}
 Right now, it is {curr_time}.
 {init_persona_action_and_place}
 {target_persona_action_and_place}
-My question: Let's think step by step. Of the following two options, what should {init_persona_name} do?
+My question: Let's think step by step. Of the following two options, what should {init_persona_name} do, considering heavily the relevance it will have to the current task that {init_persona_name} is working on?
 Option 1: Wait on {init_persona_action} until {target_persona_name} is done {target_persona_action}
 Option 2: Continue on to {init_persona_action} now
 """

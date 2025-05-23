@@ -18,7 +18,7 @@ def create_prompt(prompt_input: dict[str, Any]):
   target_persona_action = prompt_input["target_persona_action"]
 
   prompt = f"""
-Task -- Given some context, determine whether the subject will initiate a conversation with the other person. Provide your reasoning.
+Task -- Given some context and considering relevancy to the task at hand, determine whether the subject will initiate a conversation with the other person. Provide your reasoning.
 
 Context: {context}
 Right now, it is {curr_time}.

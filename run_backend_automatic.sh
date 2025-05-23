@@ -3,7 +3,7 @@
 BACKEND_SCRIPT_PATH="reverie/backend_server"
 BACKEND_SCRIPT_FILE="automatic_execution.py"
 CONDA_ENV="simulacra"
-CONDA_PATH="/home/${USER}/anaconda3/bin/activate"
+CONDA_PATH="/home/${USER}/miniconda3/bin/activate"
 LOGS_PATH="../../logs"
 
 FILE_NAME="Bash-Script"
@@ -63,6 +63,11 @@ while [[ $# -gt 0 ]]; do
         --load_history|-h)
             ARGS="${ARGS} --load_history ${2}"
             shift 2
+            ;;
+        --mqtt)
+            ARGS="${ARGS} --mqtt"
+            echo "(${FILE_NAME}): MQTT mode enabled"
+            shift
             ;;
         *)
             echo "Unknown argument: $1"

@@ -105,15 +105,15 @@ class Maze:
     maze_folder = f"{env_matrix}/maze"
 
     _cm = maze_folder + "/collision_maze.csv"
-    collision_maze_raw = read_file_to_list(_cm, header=False)[0]
+    collision_maze_raw = read_file_to_list(_cm, header=False)
     _sm = maze_folder + "/sector_maze.csv"
-    sector_maze_raw = read_file_to_list(_sm, header=False)[0]
+    sector_maze_raw = read_file_to_list(_sm, header=False)
     _am = maze_folder + "/arena_maze.csv"
-    arena_maze_raw = read_file_to_list(_am, header=False)[0]
+    arena_maze_raw = read_file_to_list(_am, header=False)
     _gom = maze_folder + "/game_object_maze.csv"
-    game_object_maze_raw = read_file_to_list(_gom, header=False)[0]
+    game_object_maze_raw = read_file_to_list(_gom, header=False)
     _slm = maze_folder + "/spawning_location_maze.csv"
-    spawning_location_maze_raw = read_file_to_list(_slm, header=False)[0]
+    spawning_location_maze_raw = read_file_to_list(_slm, header=False)
 
     # Loading the maze. The mazes are taken directly from the json exports of
     # Tiled maps. They should be in csv format. 
@@ -124,19 +124,32 @@ class Maze:
     # identical (e.g., 70 x 40).
     # example format: [['0', '0', ... '25309', '0',...], ['0',...]...]
     # 25309 is the collision bar number right now.
-    self.collision_maze = []
-    sector_maze = []
-    arena_maze = []
-    game_object_maze = []
-    spawning_location_maze = []
-    for i in range(0, len(collision_maze_raw), meta_info["maze_width"]): 
-      tw = meta_info["maze_width"]
-      self.collision_maze += [collision_maze_raw[i:i+tw]]
-      sector_maze += [sector_maze_raw[i:i+tw]]
-      arena_maze += [arena_maze_raw[i:i+tw]]
-      game_object_maze += [game_object_maze_raw[i:i+tw]]
-      spawning_location_maze += [spawning_location_maze_raw[i:i+tw]]
-
+    
+    # These are already 2D arrays from read_file_to_list
+    self.collision_maze = collision_maze_raw
+    sector_maze = sector_maze_raw
+    arena_maze = arena_maze_raw
+    game_object_maze = game_object_maze_raw
+    spawning_location_maze = spawning_location_maze_raw
+    
+    # Print dimensions for debugging
+    print(f"Actual maze rows: {len(sector_maze)}")
+    print(f"Actual maze cols: {len(sector_maze[0]) if sector_maze else 0}")
+    
+    # Ensure our maze dimensions match what we expect
+    # If the actual maze dimensions don't match meta_info dimensions, use the actual dimensions
+    if len(sector_maze) != self.maze_height:
+        print(f"Warning: Adjusting maze_height from {self.maze_height} to {len(sector_maze)}")
+        self.maze_height = len(sector_maze)
+    
+    if len(sector_maze[0]) != self.maze_width:
+        print(f"Warning: Adjusting maze_width from {self.maze_width} to {len(sector_maze[0])}")
+        self.maze_width = len(sector_maze[0])
+    
+    print(f"Final maze dimensions: {self.maze_width}x{self.maze_height}")
+    
+    # Now we have the maze matrices in the form of a 2-d matrix
+  
     # Once we are done loading in the maze, we now set up self.tiles. This is
     # a matrix accessed by row:col where each access point is a dictionary
     # that contains all the things that are taking place in that tile. 
@@ -156,27 +169,36 @@ class Maze:
     for i in range(self.maze_height): 
       row = []
       for j in range(self.maze_width):
+        # Make sure all indices are within valid range before accessing
+        valid_i = min(i, len(sector_maze) - 1)
+        valid_j = min(j, len(sector_maze[0]) - 1)
+   
         tile_details = dict()
         tile_details["world"] = wb
         
         tile_details["sector"] = ""
-        if sector_maze[i][j] in sb_dict: 
-          tile_details["sector"] = sb_dict[sector_maze[i][j]]
+        sector_val = sector_maze[valid_i][valid_j] if valid_i < len(sector_maze) and valid_j < len(sector_maze[valid_i]) else "0"
+        if sector_val in sb_dict: 
+          tile_details["sector"] = sb_dict[sector_val]
         
         tile_details["arena"] = ""
-        if arena_maze[i][j] in ab_dict: 
-          tile_details["arena"] = ab_dict[arena_maze[i][j]]
+        arena_val = arena_maze[valid_i][valid_j] if valid_i < len(arena_maze) and valid_j < len(arena_maze[valid_i]) else "0"
+        if arena_val in ab_dict: 
+          tile_details["arena"] = ab_dict[arena_val]
         
         tile_details["game_object"] = ""
-        if game_object_maze[i][j] in gob_dict: 
-          tile_details["game_object"] = gob_dict[game_object_maze[i][j]]
+        go_val = game_object_maze[valid_i][valid_j] if valid_i < len(game_object_maze) and valid_j < len(game_object_maze[valid_i]) else "0"
+        if go_val in gob_dict: 
+          tile_details["game_object"] = gob_dict[go_val]
         
         tile_details["spawning_location"] = ""
-        if spawning_location_maze[i][j] in slb_dict: 
-          tile_details["spawning_location"] = slb_dict[spawning_location_maze[i][j]]
+        spawn_val = spawning_location_maze[valid_i][valid_j] if valid_i < len(spawning_location_maze) and valid_j < len(spawning_location_maze[valid_i]) else "0"
+        if spawn_val in slb_dict: 
+          tile_details["spawning_location"] = slb_dict[spawn_val]
         
         tile_details["collision"] = False
-        if self.collision_maze[i][j] != "0": 
+        collision_val = self.collision_maze[valid_i][valid_j] if valid_i < len(self.collision_maze) and valid_j < len(self.collision_maze[valid_i]) else "0"
+        if collision_val != "0": 
           tile_details["collision"] = True
 
         tile_details["events"] = set()

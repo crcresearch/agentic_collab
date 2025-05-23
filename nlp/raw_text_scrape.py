@@ -1,4 +1,4 @@
-# This script is intended to scape agent conversations only
+# This script is intended to scrape agent conversations only
 
 # importing modules
 import json

@@ -1,85 +1,77 @@
 {
-  "the Ville": {
-    "Oak Hill College": {
-      "hallway": [],
-      "library": [
-        "library sofa",
-        "library table",
-        "bookshelf"
-      ],
-      "classroom": [
-        "blackboard",
-        "classroom podium",
-        "classroom student seating"
+  "the CRC": {
+    "Living Area": {
+      "Living Area": [
+        "sofa"
       ]
     },
-    "Dorm for Oak Hill College": {
-      "garden": [
-        "dorm garden"
-      ],
-      "Klaus Mueller's room": [
-        "bed",
-        "game console",
-        "closet",
-        "desk"
-      ],
-      "woman's bathroom": [
-        "toilet",
-        "shower",
-        "bathroom sink"
-      ],
-      "common room": [
-        "common room sofa",
-        "pool table",
-        "common room table"
-      ],
-      "man's bathroom": [
-        "shower",
-        "bathroom sink",
+    "Desk Area 1": {
+      "Desk Area 1": [
+        "desk",
+        "chair",
+        "filing cabinet"
+      ]
+    },
+    "Desk Area 2": {
+      "Desk Area 2": [
+        "desk",
+        "chair",
+        "monitor"
+      ]
+    },
+    "Small Conference Room 1": {
+      "Small Conference Room 1": [
+        "round table"
+      ]
+    },
+    "Small Conference Room 2": {
+      "Small Conference Room 2": [
+        "table"
+      ]
+    },
+    "Large Conference Room": {
+      "Large Conference Room": [
+        "long table"
+      ]
+    },
+    "Bathroom 1": {
+      "Bathroom 1": [
         "toilet"
       ]
     },
-    "The Willows Market and Pharmacy": {
-      "store": [
-        "grocery store shelf",
-        "behind the grocery counter",
-        "grocery store counter",
-        "pharmacy store shelf",
-        "pharmacy store counter",
-        "behind the pharmacy counter"
+    "Bathroom 2": {
+      "Bathroom 2": [
+        "sink"
       ]
     },
-    "Fire station": {
-      "fire station": [
-        "fire truck",
-        "bunks",
-        "common area"
+    "Closet": {
+      "Closet": [
+        "storage bin"
       ]
     },
-    "Johnson Park": {
-      "park": [
-        "park garden"
+    "Hallway 1": {
+      "Hallway 1": [
+        "directional signage"
       ]
     },
-    "The Rose and Crown Pub": {
-      "pub": [
-        "shelf",
-        "refrigerator",
-        "bar customer seating",
-        "behind the bar counter",
-        "kitchen sink",
-        "cooking area",
-        "microphone"
+    "Hallway 2": {
+      "Hallway 2": [
+        "exit sign"
       ]
     },
-    "Hobbs Cafe": {
-      "cafe": [
-        "refrigerator",
-        "cafe customer seating",
-        "cooking area",
-        "kitchen sink",
-        "behind the cafe counter",
-        "piano"
+    "Hallway 3": {
+      "Hallway 3": [
+        "hallway sign"
+      ]
+    },
+    "Hallway 4": {
+      "Hallway 4": [
+        "hallway marker"
+      ]
+    },
+    "Break Room": {
+      "Break Room": [
+        "kitchen counter"
       ]
     }
   }

@@ -647,18 +647,25 @@ def _long_term_planning(persona, new_day):
     # if this is the start of generation (so there is no previous day's 
     # daily requirement, or if we are on a new day, we want to create a new
     # set of daily requirements.
+    #Making sure we revise the identity of the persona before creating the daily_req on day 1
+    revise_identity(persona)
+    
     persona.scratch.daily_req = generate_first_daily_plan(persona, 
                                                           wake_up_hour)
-  elif new_day == "New day":
-    revise_identity(persona)
+  elif new_day == "New day": #we only revise the personas of cognitive agents
+    if not persona.scratch.is_noncognitive(): revise_identity(persona)
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - TODO
     # We need to create a new daily_req here...
     persona.scratch.daily_req = persona.scratch.daily_req
+  
+  # elif new_day == "Same day":
+  #   revise_identity(persona)
+  #   persona.scratch.daily_req = persona.scratch.daily_req
 
   # Based on the daily_req, we create an hourly schedule for the persona, 
   # which is a list of todo items with a time duration (in minutes) that 
-  # add up to 24 hours.
+  # add up to 24 hours.  
   persona.scratch.f_daily_schedule = generate_hourly_schedule(persona, 
                                                               wake_up_hour)
   persona.scratch.f_daily_schedule_hourly_org = (persona.scratch
@@ -666,19 +673,20 @@ def _long_term_planning(persona, new_day):
 
 
   # Added March 4 -- adding plan to the memory.
-  thought = f"This is {persona.scratch.name}'s plan for {persona.scratch.curr_time.strftime('%A %B %d')}:"
-  for i in persona.scratch.daily_req: 
-    thought += f" {i},"
-  thought = thought[:-1] + "."
-  created = persona.scratch.curr_time
-  expiration = persona.scratch.curr_time + datetime.timedelta(days=30)
-  s, p, o = (persona.scratch.name, "plan", persona.scratch.curr_time.strftime('%A %B %d'))
-  keywords = set(["plan"])
-  thought_poignancy = 5
-  thought_embedding_pair = (thought, get_embedding(thought))
-  persona.a_mem.add_thought(created, expiration, s, p, o, 
-                            thought, keywords, thought_poignancy, 
-                            thought_embedding_pair, None)
+  if not persona.scratch.is_noncognitive(): # only add plan to memory if cognitive
+    thought = f"This is {persona.scratch.name}'s plan for {persona.scratch.curr_time.strftime('%A %B %d')}:"
+    for i in persona.scratch.daily_req: 
+      thought += f" {i},"
+    thought = thought[:-1] + "."
+    created = persona.scratch.curr_time
+    expiration = persona.scratch.curr_time + datetime.timedelta(days=30)
+    s, p, o = (persona.scratch.name, "plan", persona.scratch.curr_time.strftime('%A %B %d'))
+    keywords = set(["plan"])
+    thought_poignancy = 5
+    thought_embedding_pair = (thought, get_embedding(thought))
+    persona.a_mem.add_thought(created, expiration, s, p, o, 
+                              thought, keywords, thought_poignancy, 
+                              thought_embedding_pair, None)
 
   # print("Sleeping for 20 seconds...")
   # time.sleep(10)
@@ -1127,7 +1135,7 @@ def plan(persona, maze, personas, new_day, retrieved):
     The target action address of the persona (persona.scratch.act_address).
   """ 
   # PART 1: Generate the hourly schedule. 
-  if new_day: 
+  if new_day:
     _long_term_planning(persona, new_day)
 
   # PART 2: If the current action has expired, we want to create a new plan.

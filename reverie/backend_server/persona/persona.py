@@ -209,13 +209,17 @@ class Persona:
     elif (self.scratch.curr_time.strftime('%A %B %d')
           != curr_time.strftime('%A %B %d')):
       new_day = "New day"
+    # else:
+    #   new_day = "Same day"
+      
     self.scratch.curr_time = curr_time
 
     # Main cognitive sequence begins here. 
     perceived = self.perceive(maze)
     retrieved = self.retrieve(perceived)
     plan = self.plan(maze, personas, new_day, retrieved)
-    self.reflect()
+    if not self.scratch.is_noncognitive(): #noncognitive agents can't reflect at all
+      self.reflect()
 
     # <execution> is a triple set that contains the following components: 
     # <next_tile> is a x,y coordinate. e.g., (58, 9)
