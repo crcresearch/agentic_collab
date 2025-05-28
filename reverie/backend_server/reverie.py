@@ -38,6 +38,11 @@ from utils import openai_api_key, use_openai, api_model
 from openai import OpenAI
 from mqtt_client import ReverieMQTTClient
 
+### Imports for Chat communication ###
+from persona.cognitive_modules.retrieve import new_retrieve
+from persona.cognitive_modules.plan import generate_summarize_agent_relationship
+from persona.cognitive_modules.converse import generate_one_utterance
+
 current_file = os.path.abspath(__file__)
 
 def trace_calls_and_lines(frame, event, arg):
@@ -79,6 +84,92 @@ def ChatGPT_single_request(prompt):
   else:
     print("Error: No message content from LLM.", flush=True)
     return ""
+
+def agent_chat_v2(maze, init_persona, target_persona): 
+  curr_chat = []
+
+  for i in range(8): 
+    focal_points = [f"{target_persona.scratch.name}"]
+    retrieved = new_retrieve(init_persona, focal_points, 50) 
+    relationship = generate_summarize_agent_relationship(init_persona, target_persona, retrieved)
+    print ("-------- relationship: ", relationship)
+    last_chat = ""
+    for i in curr_chat[-4:]:
+      last_chat += ": ".join(i) + "\n"
+    if last_chat: 
+      focal_points = [f"{relationship}", 
+                      f"{target_persona.scratch.name} is {target_persona.scratch.act_description}", 
+                      last_chat]
+    else: 
+      focal_points = [f"{relationship}", 
+                      f"{target_persona.scratch.name} is {target_persona.scratch.act_description}"]
+    retrieved = new_retrieve(init_persona, focal_points, 15)
+    utt, end = generate_one_utterance(maze, init_persona, target_persona, retrieved, curr_chat)
+
+    curr_chat += [[init_persona.scratch.name, utt]]
+    if end:
+      break
+
+    focal_points = [f"{init_persona.scratch.name}"]
+    retrieved = new_retrieve(target_persona, focal_points, 50)
+    relationship = generate_summarize_agent_relationship(target_persona, init_persona, retrieved)
+    print ("-------- relationship: ", relationship)
+    last_chat = ""
+    for i in curr_chat[-4:]:
+      last_chat += ": ".join(i) + "\n"
+    if last_chat: 
+      focal_points = [f"{relationship}", 
+                      f"{init_persona.scratch.name} is {init_persona.scratch.act_description}", 
+                      last_chat]
+    else: 
+      focal_points = [f"{relationship}", 
+                      f"{init_persona.scratch.name} is {init_persona.scratch.act_description}"]
+    retrieved = new_retrieve(target_persona, focal_points, 15)
+    utt, end = generate_one_utterance(maze, target_persona, init_persona, retrieved, curr_chat)
+
+    curr_chat += [[target_persona.scratch.name, utt]]
+    if end:
+      break
+
+  return curr_chat
+
+def generate_convo(maze, init_persona, target_persona):
+  curr_loc = maze.access_tile(init_persona.scratch.curr_tile)
+
+  # convo = run_gpt_prompt_create_conversation(init_persona, target_persona, curr_loc)[0]
+  # convo = agent_chat_v1(maze, init_persona, target_persona)
+  convo = agent_chat_v2(maze, init_persona, target_persona)
+  all_utt = ""
+
+  for row in convo:
+    speaker = row[0]
+    utt = row[1]
+    all_utt += f"{speaker}: {utt}\n"
+
+  convo_length = math.ceil(int(len(all_utt) / 8) / 30)
+
+  if debug:
+    print("GNS FUNCTION: <generate_convo>")
+  return convo, convo_length
+
+def update_daily_req(commander, agent, perceived, convo):
+  daily_req_prompt = f"Here is the relevant information about {commander.scratch.name}: {commander.scratch.get_str_iss()}\n"
+  daily_req_prompt += (
+      f"Today is {commander.scratch.curr_time.strftime('%A %B %d')}. "
+      f"Here is the conversation between {commander.scratch.name} and {agent.scratch.name}: {convo} \n"
+  )
+  daily_req_prompt += f"This is what {agent.scratch.name} currently perceives:\n"
+  daily_req_prompt += f"{perceived}\n"
+  daily_req_prompt += (
+      f"""Use the {perceived} and {convo} to generate a list of daily requirements that {commander.scratch.name} would command {agent.scratch.name}
+        to do for the day. Follow this format (the list should have 4–6 items but no more):\n"""
+  )
+  daily_req_prompt += "1. Cut open black backpack <time>, 2. Disconnect power source <time>, 3. Cut red wire with pliers <time>, 4. ...\n\n"
+
+  new_daily_req = ChatGPT_single_request(daily_req_prompt)
+  new_daily_req = new_daily_req.replace('\n', ' ')
+  agent.scratch.daily_plan_req = new_daily_req
+  print(f"DEBUG: {agent.scratch.name}'s New Daily Requirements: {new_daily_req}")
 
 class ReverieServer:
   def __init__(
@@ -337,36 +428,54 @@ class ReverieServer:
 
     perceived = list(environment.items())[0][1]["perceived"]
 
-    ### TODO: converting Police Chief Rex's chat with advisors to daily req input ###
-    print("DEBUG: Police Chief Rex Communicating with Robots via memory stream injection:", self.personas["Police Chief Rex"].scratch.chat)
+    ### TODO: Police Chief Rex Communication with Robots via chat ###
+    print("DEBUG: Police Chief Rex Communication with Robots via chat:", self.personas["Police Chief Rex"].scratch.chat)  
     commander = self.personas["Police Chief Rex"]
     agent1 = self.personas["Isabella Rodriguez"]
     agent2 = self.personas["Klaus Mueller"]
 
-    daily_req_prompt = commander.scratch.get_str_iss() + "\n"
-    daily_req_prompt += (
-        f"Today is {commander.scratch.curr_time.strftime('%A %B %d')}. "
-        f"Here is {commander.scratch.name}'s plan today in broad-strokes "
-        "(with the time of the day. e.g., have a lunch at 12:00 pm, watch TV from 7 to 8 pm).\n\n"
-    )
-    daily_req_prompt += "This is what the robot currently perceives:\n"
-    daily_req_prompt += f"{perceived}\n"
-    daily_req_prompt += (
-        f"Use the {perceived} to generate a list of daily requirements "
-        "for the day. Follow this format (the list should have 4–6 items but no more):\n"
-    )
-    daily_req_prompt += "1. wake up and complete the morning routine at <time>, 2. ..."
+    convo_1, _ = generate_convo(self.maze, commander, agent1)  
+    print("DEBUG: Police Chief Rex Communication with Isabella Rodriguez:", convo_1)
 
-    new_daily_req = ChatGPT_single_request(daily_req_prompt)
-    new_daily_req = new_daily_req.replace('\n', ' ')
+    convo_2, _ = generate_convo(self.maze, commander, agent2)
+    print("DEBUG: Police Chief Rex Communication with Klaus Mueller:", convo_2)
 
-    ### TODO: ADDING THE COMMANDER CODY'S CHAT WITH ADVISORS TO AGENTS DAILY REQ ###
-    print("DEBUG new_daily_req:", new_daily_req)
-    agent1.scratch.daily_plan_req = new_daily_req
-    agent2.scratch.daily_plan_req = new_daily_req
+    ### TODO: Updating Isabella Rodriguez's Daily Requirements ###
+    update_daily_req(commander, agent1, perceived, convo_1)
 
-    print("DEBUG: agent1.scratch.daily_plan_req:", agent1.scratch.daily_plan_req)
-    print("DEBUG: agent2.scratch.daily_plan_req:", agent2.scratch.daily_plan_req)
+    ### TODO: Updating Klaus Mueller's Daily Requirements ###
+    update_daily_req(commander, agent2, perceived, convo_2)
+
+    ### TODO: Police Chief Rex Communicating with Robots via memory stream injection ###
+    # print("DEBUG: Police Chief Rex Communicating with Robots via memory stream injection:", self.personas["Police Chief Rex"].scratch.chat)
+    # commander = self.personas["Police Chief Rex"]
+    # agent1 = self.personas["Isabella Rodriguez"]
+    # agent2 = self.personas["Klaus Mueller"]
+
+    # daily_req_prompt = commander.scratch.get_str_iss() + "\n"
+    # daily_req_prompt += (
+    #     f"Today is {commander.scratch.curr_time.strftime('%A %B %d')}. "
+    #     f"Here is {commander.scratch.name}'s plan today in broad-strokes "
+    #     "(with the time of the day. e.g., have a lunch at 12:00 pm, watch TV from 7 to 8 pm).\n\n"
+    # )
+    # daily_req_prompt += "This is what the robot currently perceives:\n"
+    # daily_req_prompt += f"{perceived}\n"
+    # daily_req_prompt += (
+    #     f"Use the {perceived} to generate a list of daily requirements "
+    #     "for the day. Follow this format (the list should have 4–6 items but no more):\n"
+    # )
+    # daily_req_prompt += "1. wake up and complete the morning routine at <time>, 2. ..."
+
+    # new_daily_req = ChatGPT_single_request(daily_req_prompt)
+    # new_daily_req = new_daily_req.replace('\n', ' ')
+
+    # ### TODO: ADDING Police Chief Rex's Daily Requirements to Robots' Daily Requirements ###
+    # print("DEBUG Chief Rex's Daily Requirements:", new_daily_req)
+    # agent1.scratch.daily_plan_req = new_daily_req
+    # agent2.scratch.daily_plan_req = new_daily_req
+
+    # print("DEBUG: Isabella Rodriguez's Daily Requirements:", agent1.scratch.daily_plan_req)
+    # print("DEBUG: Klaus Mueller's Daily Requirements:", agent2.scratch.daily_plan_req)
 
     # Include the meta information about the current stage in the
     # movements dictionary.
