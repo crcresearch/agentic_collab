@@ -32,15 +32,14 @@ from global_methods import read_file_to_list, check_if_file_exists, copyanything
 from utils import maze_assets_loc, fs_storage, fs_temp_storage, mqtt_host, mqtt_port, mqtt_client_id, mqtt_movement_topic, mqtt_environment_topic
 from maze import Maze
 from persona.persona import Persona
-from persona.cognitive_modules.converse import load_history_via_whisper
 from persona.prompt_template.run_gpt_prompt import run_plugin
 from utils import openai_api_key, use_openai, api_model
 from openai import OpenAI
 from mqtt_client import ReverieMQTTClient
 
 ### Imports for Chat communication ###
+from persona.cognitive_modules.converse import load_history_via_whisper, generate_summarize_agent_relationship
 from persona.cognitive_modules.retrieve import new_retrieve
-from persona.cognitive_modules.plan import generate_summarize_agent_relationship
 from persona.cognitive_modules.converse import generate_one_utterance
 
 current_file = os.path.abspath(__file__)
