@@ -15,7 +15,7 @@
   "learned": "Klaus Mueller is a robotic unit designed for emergency response operations. He is equipped with sensors and tools to assist in dangerous situations. He takes direct orders from Police Chief Rex.", 
   "currently": "Klaus is at the CRC taking orders from Police Chief Rex on how to disarm the explosive device in a suspicious backpack in collaboration with Isabella Rodriguez. The backpack is believed to contain an explosive device that needs to be located and secured. He is reporting to Police Chieft Rex what it sees and its surroundings. He will get his instructions from Police Chief Rex.",  
   "lifestyle": "Klaus Mueller is a robot that remains operational 24/7, with maintenance periods scheduled during low-activity hours.", 
-  "living_area": "the Ville:Fire station:fire station",
+  "living_area": "the CRC:Living Area:Living Area",
   "concept_forget": 100,
   "daily_reflection_time": 180,
   "daily_reflection_size": 5,

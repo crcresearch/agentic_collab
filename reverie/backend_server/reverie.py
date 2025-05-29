@@ -44,6 +44,12 @@ from persona.cognitive_modules.converse import generate_one_utterance
 
 current_file = os.path.abspath(__file__)
 
+# Color Key 
+robot_block = "\U0001F7E9"
+captain_block = "\U0001F7E6"
+communication_block = "\U0001F7E8"
+order_block = "\U0001F7E5"
+
 def trace_calls_and_lines(frame, event, arg):
   if event == 'call':
     code = frame.f_code
@@ -147,8 +153,7 @@ def generate_convo(maze, init_persona, target_persona):
 
   convo_length = math.ceil(int(len(all_utt) / 8) / 30)
 
-  if debug:
-    print("GNS FUNCTION: <generate_convo>")
+  print("GNS FUNCTION: <generate_convo> between robot and commander")
   return convo, convo_length
 
 def update_daily_req(commander, agent, perceived, convo):
@@ -168,7 +173,12 @@ def update_daily_req(commander, agent, perceived, convo):
   new_daily_req = ChatGPT_single_request(daily_req_prompt)
   new_daily_req = new_daily_req.replace('\n', ' ')
   agent.scratch.daily_plan_req = new_daily_req
-  print(f"DEBUG: {agent.scratch.name}'s New Daily Requirements: {new_daily_req}")
+
+  ### Displaying Police Chief Rex's New Orders for the Robot ###
+  print(f"{order_block}\n")
+  print(f"Police Chief Rex new orders for {agent.scratch.name}: \n")
+  print(f"{new_daily_req}\n")
+  print(f"{order_block}\n")
 
 class ReverieServer:
   def __init__(
@@ -386,6 +396,8 @@ class ReverieServer:
     next_env = {}
 
     ### Gettitng Perception from Robots via environment file ###
+    sim_folder = f"{fs_storage}/{self.sim_code}"
+
     with open(f"{sim_folder}/environment/{self.step}.json", "r") as f:
       environment = json.load(f)
       print("DEBUG: Robots' environment:", environment)
@@ -425,23 +437,46 @@ class ReverieServer:
           "maze": self.maze.maze_name,
         }
 
-    perceived = list(environment.items())[0][1]["perceived"]
+    ### Retrieving Perception from Robots ###
+    try:
+      perceived = list(environment.items())[0][1]["perceived"]
+    except:
+      print("DEBUG: No perceived by the robots for Police Chief Rex")
+      perceived = "A small room with a table, chair, and a backpack on the floor. List of Objects: ['table', 'chair', 'backpack', 'trash can', 'IED']"
+      maze = "the CRC"
+      x_position = 71
+      y_position = 14
+      robot_name = "Robot 1"
 
     ### TODO: Police Chief Rex Communication with Robots via chat ###
-    print("DEBUG: Police Chief Rex Communication with Robots via chat:", self.personas["Police Chief Rex"].scratch.chat)  
     commander = self.personas["Police Chief Rex"]
     agent1 = self.personas["Isabella Rodriguez"]
     agent2 = self.personas["Klaus Mueller"]
-
     convo_1, _ = generate_convo(self.maze, commander, agent1)  
-    print("DEBUG: Police Chief Rex Communication with Isabella Rodriguez:", convo_1)
-
     convo_2, _ = generate_convo(self.maze, commander, agent2)
-    print("DEBUG: Police Chief Rex Communication with Klaus Mueller:", convo_2)
+
+    ### Displaying Robot Info ###
+    print(f"{robot_block}\n") 
+    print(f"{robot_name} Location: {maze}, Coordinate Position: {x_position}, {y_position}\n")
+    print(f"Environment Perceived:\n{perceived}\n")
+    print(f"{robot_block}\n") 
+
+    ### Displaying Police Chief Rex's info ###
+    print(f"{captain_block}\n") 
+    print(f"Police Chief Rex's Location: Police HQ, Coordinate Position: {commander.scratch.curr_tile[0]}, {commander.scratch.curr_tile[1]}\n")
+    print(f"Environment Perceived by the Police Chief Rex from {robot_name}:\n{perceived}\n")
+    print(f"{captain_block}\n")
+
+    ### Displaying Police Chief Rex's Communication with Robots ###
+    print(f"{communication_block}\n")
+    print(f"Police Chief Rex Communication with {agent1.scratch.name}:\n")
+    print(f"{convo_1}\n")
+    print(f"Police Chief Rex Communication with {agent2.scratch.name}:\n")
+    print(f"{convo_2}\n")
+    print(f"{communication_block}\n")
 
     ### TODO: Updating Isabella Rodriguez's Daily Requirements ###
     update_daily_req(commander, agent1, perceived, convo_1)
-
     ### TODO: Updating Klaus Mueller's Daily Requirements ###
     update_daily_req(commander, agent2, perceived, convo_2)
 
